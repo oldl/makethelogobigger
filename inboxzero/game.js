@@ -39,8 +39,8 @@ const screens = {
 let W = canvas.width;
 let H = canvas.height;
 const colors = ["#34d957", "#19e3e3", "#ff3d9a", "#ffd23d", "#ff3b3b"];
-const enemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
-const fallbackEnemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
+const enemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
+const fallbackEnemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
 const enemyLabels = {
   email: "EMAIL",
   meeting: "DOUBLE MEETING",
@@ -60,10 +60,12 @@ const enemyLabels = {
   po_japon: "PO AU JAPON",
   ezf: "EZF",
   magnolia: "MAGNOLIA",
-  last_update: "LAST UPDATE",
-  mfa_loop: "MFA LOOP",
-  vpn_down: "VPN DOWN",
-  security_patch: "SECURITY PATCH",
+  consultant: "CONSULTANT",
+  handover: "HANDOVER",
+  last_update: "PASSKEY",
+  mfa_loop: "EASY FORM",
+  vpn_down: "SUNDAY RELEASE",
+  security_patch: "HANDOVER",
   lazy_loading: "LAZY LOADING",
   infinite_versions: "INFINITE VERSIONS",
   question: "ERROR 404"
@@ -87,6 +89,8 @@ const enemyLabelColors = {
   po_japon: "#ff8a1a",
   ezf: "#b56cff",
   magnolia: "#ff9ad5",
+  consultant: "#2f7dff",
+  handover: "#b56cff",
   last_update: "#ff8a1a",
   mfa_loop: "#b56cff",
   vpn_down: "#19e3e3",
@@ -114,6 +118,8 @@ const imageSpriteSources = {
   po_japon: "assets/7b47e6e9-510a-4887-9207-0725d9d68171_removalai_preview.png",
   ezf: "assets/80a6a32c-565c-4d2a-8f3b-95b40b6f248a_removalai_preview.png",
   magnolia: "assets/fd7ce6b2-aa9d-40ac-8007-6750eda266a8_removalai_preview.png",
+  consultant: "assets/ffcc5fdc-9d63-4ee3-b640-9428ae65c095_removalai_preview.png",
+  handover: "assets/f4206ee6-d974-46e2-9924-645abaea0b58_removalai_preview.png",
   last_update: "assets/7311083a-2ebb-4465-ae2c-28606e0e98e7_removalai_preview.png",
   mfa_loop: "assets/ca6b6877-e752-4e89-9191-3670797ed381_removalai_preview.png",
   vpn_down: "assets/12599df6-1e90-4584-9417-eee2061a4efa_removalai_preview.png",
@@ -173,11 +179,9 @@ const bossNames = [
   "CC EMAILS",
   "CONTRADICTORY INFORMATION",
   "PRINTER",
-  "MONDAY",
-  "PASSKEY",
-  "SUNDAY RELEASE"
+  "MONDAY MORNING"
 ];
-const bossSpriteKeys = ["boss_cc", "boss_contradictory", "boss_printer", "boss_monday", "boss_passkey", "boss_sunday_release"];
+const bossSpriteKeys = ["boss_cc", "boss_contradictory", "boss_printer", "boss_monday"];
 const MAX_LIVES = 5;
 const MAX_LEVEL = 16;
 const LAST_CHANCE_FOCUS_COST = 60;
@@ -1015,9 +1019,9 @@ function spawnEnemy() {
 }
 
 function createEnemy(type, fast, difficulty) {
-  const size = type === "as400" ? (fast ? 96 : 92) : (["last_update", "mfa_loop", "vpn_down", "security_patch", "po_japon", "ezf", "magnolia"].includes(type) ? (fast ? 88 : 80) : (fast ? 90 : 82));
-  const hp = type === "as400" ? (fast ? 4 : 3) : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" || type === "ezf" || type === "magnolia" ? 2 : 1);
-  const speedMods = { as400: 0.66, praat_barak: 1.18, po_japon: 1.08, ezf: 0.94, magnolia: 0.9, last_update: 1.28, vpn_down: 1.15, security_patch: 0.82 };
+  const size = type === "as400" ? (fast ? 96 : 92) : (["last_update", "mfa_loop", "vpn_down", "security_patch", "po_japon", "ezf", "magnolia", "consultant", "handover"].includes(type) ? (fast ? 88 : 80) : (fast ? 90 : 82));
+  const hp = type === "as400" ? (fast ? 4 : 3) : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" || type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" ? 2 : 1);
+  const speedMods = { as400: 0.66, praat_barak: 1.18, po_japon: 1.08, ezf: 0.94, magnolia: 0.9, last_update: 1.28, vpn_down: 1.15, security_patch: 0.82, consultant: 0.96, handover: 0.92 };
   const speedMod = speedMods[type] || 1;
   return {
     type,
@@ -1028,7 +1032,7 @@ function createEnemy(type, fast, difficulty) {
     h: size,
     hp,
     maxHp: hp,
-    scoreValue: type === "as400" ? 28 : (type === "ezf" || type === "magnolia" ? 24 : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" ? 18 : null)),
+    scoreValue: type === "as400" ? 28 : (type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" ? 24 : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" ? 18 : null)),
     vx: (Math.random() - 0.5) * (46 + difficulty * 10.8) * speedMod,
     vy: ((fast ? 112 : 68) + difficulty * 14.5) * speedMod,
     color: fast ? "#ff3b3b" : (enemyLabelColors[type] || colors[Math.floor(Math.random() * colors.length)]),
@@ -1053,7 +1057,7 @@ function shootEnemy(enemy) {
     [-70, 0, 70].forEach(vx => pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, vx, speed, 8, 18));
   } else if (enemy.type === "blue_screen") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.18, speed * 0.58, 24, 30);
-  } else if (enemy.type === "ppt" || enemy.type === "word" || enemy.type === "lazy_loading" || enemy.type === "infinite_versions" || enemy.type === "as400" || enemy.type === "mfa_loop" || enemy.type === "security_patch" || enemy.type === "ezf" || enemy.type === "magnolia") {
+  } else if (enemy.type === "ppt" || enemy.type === "word" || enemy.type === "lazy_loading" || enemy.type === "infinite_versions" || enemy.type === "as400" || enemy.type === "mfa_loop" || enemy.type === "security_patch" || enemy.type === "ezf" || enemy.type === "magnolia" || enemy.type === "consultant" || enemy.type === "handover") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.35, speed * 0.78, 14, 24);
   } else if (enemy.type === "jira" || enemy.type === "chat" || enemy.type === "windouf" || enemy.type === "praat_barak" || enemy.type === "vpn_down" || enemy.type === "po_japon") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, (Math.random() > 0.5 ? 1 : -1) * 95, speed * 0.95, 8, 18, 56);
@@ -1445,10 +1449,7 @@ function update(dt) {
     if (boss.x < 24 || boss.x + boss.w > W - 24) boss.vx *= -1;
     if (bossShootCooldown <= 0) {
       const difficulty = levelDifficulty();
-      const isSecurityBoss = boss.spriteKey === "boss_passkey" || boss.spriteKey === "boss_sunday_release";
-      const shots = isSecurityBoss
-        ? (level >= 12 ? [-64, -32, 0, 32, 64] : [-34, 0, 34])
-        : (level >= 12 ? [-48, -24, 0, 24, 48] : (level >= 6 ? [-28, 0, 28] : [0]));
+      const shots = level >= 12 ? [-48, -24, 0, 24, 48] : (level >= 6 ? [-28, 0, 28] : [0]);
       shots.forEach(offset => pushEnemyBullet(
         boss.x + boss.w / 2 + offset,
         boss.y + boss.h,
