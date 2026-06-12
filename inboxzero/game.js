@@ -1453,12 +1453,10 @@ function update(dt) {
       shots.forEach(offset => pushEnemyBullet(
         boss.x + boss.w / 2 + offset,
         boss.y + boss.h,
-        offset * (isSecurityBoss ? 2.4 : 1.9),
-        (isSecurityBoss ? 190 : 160) + difficulty * (isSecurityBoss ? 24 : 20),
-        isSecurityBoss ? 18 : 8,
-        isSecurityBoss ? 30 : 18,
-        isSecurityBoss ? 28 : 0,
-        isSecurityBoss ? "boss_special_shot" : "enemy_shot"
+        offset * 1.9,
+        160 + difficulty * 20,
+        8,
+        18
       ));
       bossShootCooldown = Math.max(0.42, 1.5 - difficulty * 0.07);
     }
