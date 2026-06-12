@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>INBOX INVADERS - SYSTEM INTERFERENCE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=20260612b">
+  </head>
+  <body class="loading-assets">
+    <div id="assetLoader" class="asset-loader" role="status" aria-live="polite">
+      <div class="asset-loader-card">
+        <img class="asset-loader-art" src="assets/loading_999.png" alt="">
+        <p>LOADING INBOX</p>
+        <strong id="assetLoaderPercent">0%</strong>
+        <div class="asset-loader-bar" aria-hidden="true"><span id="assetLoaderBar"></span></div>
+      </div>
+    </div>
+    <div class="crt-overlay"></div>
+    <div class="vignette"></div>
+
+    <header class="game-header">
+      <div class="marquee-logo">
+        <div>
+          <div class="marquee-logo-line">INBOX</div>
+          <div class="marquee-logo-title">INVADERS</div>
+        </div>
+        <div class="marquee-lives">
+          <span class="hud-label">VIES</span>
+          <span id="livesReadout">5</span>
+          <i id="healthBar"><em></em></i>
+        </div>
+      </div>
+
+      <div class="marquee-score">
+        <img class="score-comet score-comet-left" src="assets/tamaris.png" alt="" aria-hidden="true">
+        <p>SCORE</p>
+        <strong id="score">0</strong>
+        <img class="score-comet score-comet-right" src="assets/tamaris 2.png" alt="" aria-hidden="true">
+        <div class="marquee-sub">
+          <span>HI <strong id="highScore">0</strong></span>
+          <span>LV <strong id="level">1</strong></span>
+        </div>
+      </div>
+
+      <div class="marquee-right">
+        <div class="marquee-meter focus-hud">
+          <div class="marquee-meter-top">
+            <p>FOCUS</p>
+            <span id="focusPercent">0%</span>
+          </div>
+          <div class="segmented-focus" id="focusBar" aria-label="Focus charge"><em></em></div>
+        </div>
+
+        <div class="marquee-meter focus-hud heat-hud">
+          <div class="marquee-meter-top">
+            <p>OUTBOX</p>
+            <span id="heatPercent">READY</span>
+          </div>
+          <div class="segmented-focus heat-meter" id="heatBar" aria-label="Outbox heat"><em></em></div>
+        </div>
+
+        <div class="hud-buttons">
+          <button data-action="pause" aria-label="Pause">⏸️</button>
+          <button data-action="mute" class="sound-toggle" aria-label="Mute sound" aria-pressed="false" title="Mute sound">
+            <span class="sound-icon">🔊</span>
+          </button>
+          <button class="ticket-ask-button" data-action="how" aria-label="Ticket Ask">TICKET ASK</button>
+        </div>
+      </div>
+      <strong id="lives" class="sr-counter">3</strong>
+    </header>
+
+    <nav id="commandDock" class="command-dock command-dock-global" aria-label="Navigation écrans">
+      <button class="cd-back" type="button" data-action="back">◄ RETOUR</button>
+      <div class="cd-tabs" role="tablist">
+        <button class="cd-tab" type="button" role="tab" aria-selected="false" data-screen-tab="playerSetup" data-action="changePlayer"><span class="cd-label">PO HEROS</span></button>
+        <button class="cd-tab" type="button" role="tab" aria-selected="false" data-screen-tab="how" data-action="how"><span class="cd-label">RÈGLES</span></button>
+        <button class="cd-tab" type="button" role="tab" aria-selected="false" data-screen-tab="leaderboard" data-action="scores"><span class="cd-label">CLASSEMENT</span></button>
+      </div>
+      <button id="commandDockPrimary" class="cd-validate" type="button" data-action="savePlayer">VALIDER ►</button>
+    </nav>
+
+    <main class="game-stage">
+      <section class="arcade-zone screen-jitter" id="game-zone" aria-label="Inbox Invaders arcade station">
+        <div class="perspective-grid"></div>
+        <canvas id="gameCanvas" width="540" height="960" aria-label="INBOX INVADERS gameplay canvas"></canvas>
+
+        <div id="startScreen" class="overlay active">
+          <div class="start-invader-field" aria-hidden="true">
+            <img src="assets/email.png" alt="">
+            <img src="assets/double meeting.png" alt="">
+            <img src="assets/call.png" alt="">
+            <img src="assets/ppt.png" alt="">
+            <img src="assets/ticket jira.png" alt="">
+            <img src="assets/windouf update.png" alt="">
+          </div>
+          <p class="coin-line">1CR = 1 PLAY</p>
+          <h1 class="start-logo"><span class="start-logo-inbox">INBOX</span> <span class="start-logo-invaders">INVADERS</span></h1>
+          <p>SAVE YOUR FOCUS. ERASE CORPORATE CHAOS.</p>
+          <p id="playerReadout" class="player-readout">PILOTE : INVITE</p>
+          <img id="playerAvatarPreview" class="player-avatar-preview" alt="" aria-hidden="true">
+          <button class="start-play-banner" data-action="start"><span>INSERT COIN</span></button>
+          <div class="start-cta-row" aria-label="Start menu actions">
+            <span class="start-cta-highlight" aria-hidden="true"></span>
+            <button data-action="scores"><img class="cta-icon" src="assets/9fb9ea39-cbcb-4abc-bacf-7de5e60b2d47_removalai_preview.png" alt=""><span>SCORES</span></button>
+            <button data-action="changePlayer"><img class="cta-icon" src="assets/c6591640-6438-40c6-b56e-41e659d65d6d_removalai_preview.png" alt=""><span>CHANGER PILOTE</span></button>
+            <button data-action="how"><img class="cta-icon" src="assets/21f10f2e-6139-4a0e-9a78-9de24e61a5ad_removalai_preview.png" alt=""><span>HOW TO PLAY</span></button>
+          </div>
+        </div>
+
+        <div id="playerSetupScreen" class="overlay redesign-screen player-setup-panel">
+          <p class="screen-kicker">IDENTIFICATION PILOTE</p>
+          <h2 class="enter-name-title">ENTER NAME</h2>
+          <div class="character-layout">
+            <aside class="screen-panel pilot-card">
+              <span class="panel-tag">PILOTE</span>
+              <img id="setupAvatarPreview" class="setup-avatar-preview" alt="" aria-hidden="true">
+              <strong id="setupPilotName" class="pilot-name">INVITE</strong>
+              <span id="setupPilotClass" class="pilot-class">RECRUE</span>
+              <dl class="pilot-stats">
+                <div><dt>RANG</dt><dd>RECRUE</dd></div>
+                <div><dt>FOCUS</dt><dd>99%</dd></div>
+                <div><dt>STATUT</dt><dd>READY</dd></div>
+              </dl>
+              <p class="screen-hint">▲ clique un avatar · tape ton pseudo</p>
+            </aside>
+            <div class="character-main">
+              <label class="player-name-field">
+                <span>PSEUDO</span>
+                <input id="playerNameInput" type="text" maxlength="18" autocomplete="nickname" placeholder="ex: OLIVIER">
+              </label>
+              <p class="roster-label">CHOISIS TON PO</p>
+              <div id="avatarGrid" class="avatar-grid roster-grid" aria-label="Choix avatar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="howScreen" class="overlay redesign-screen how-panel">
+          <div class="how-invader-field" aria-hidden="true">
+            <img src="assets/email.png" alt="">
+            <img src="assets/double meeting.png" alt="">
+            <img src="assets/call.png" alt="">
+            <img src="assets/ppt.png" alt="">
+            <img src="assets/ticket jira.png" alt="">
+            <img src="assets/windouf update.png" alt="">
+          </div>
+          <p class="screen-kicker">BRIEFING MISSION</p>
+          <h2 class="how-title">HOW TO PLAY</h2>
+          <div class="how-layout">
+            <section class="screen-panel controls-panel">
+              <span class="panel-tag">CONTROLES</span>
+              <div class="control-row movement-only"><span class="key-pill" data-key="left"></span><span class="key-pill" data-key="up"></span><span class="key-pill" data-key="down"></span><span class="key-pill" data-key="right"></span><strong>DEPLACEMENT</strong></div>
+              <div class="control-row shoot-control"><span class="key-pill key-space">ESPACE</span><strong>TIR</strong></div>
+            </section>
+            <section class="screen-panel bonus-panel">
+              <span class="panel-tag">BONUS & DROPS</span>
+              <div class="bonus-grid">
+                <div class="bonus-item coffee"><img class="legend-sprite" src="assets/bonnus_coffee.png" alt=""><span><strong>COFFEE</strong><em>cadence de tir</em></span></div>
+                <div class="bonus-item honey"><img class="legend-sprite" src="assets/bonus_honey.png" alt=""><span><strong>HONEY</strong><em>bouclier collant</em></span></div>
+                <div class="bonus-item clip"><img class="legend-sprite" src="assets/bonus_clip.png" alt=""><span><strong>CLIP</strong><em>allié trombone</em></span></div>
+                <div class="bonus-item qap"><img class="legend-sprite" src="assets/qap.png" alt=""><span><strong>QAP</strong><em>tir perforant x3</em></span></div>
+                <div class="bonus-item dolphin"><img class="legend-sprite" src="assets/bonus_dolphin.png" alt=""><span><strong>DOLPHIN</strong><em>dash esquive</em></span></div>
+                <div class="bonus-item vendredi"><img class="legend-sprite" src="assets/bonus_vendredi_15h.png" alt=""><span><strong>VENDREDI</strong><em>ralenti du temps</em></span></div>
+              </div>
+            </section>
+          </div>
+          <section class="screen-panel enemies-panel">
+            <span class="panel-tag">ENNEMIS</span>
+            <div class="enemy-legend redesign-enemies" aria-label="Invader legend">
+              <span><img class="legend-sprite" src="assets/email.png" alt="">EMAIL</span>
+              <span><img class="legend-sprite" src="assets/double meeting.png" alt="">DOUBLE MEETING</span>
+              <span><img class="legend-sprite" src="assets/call.png" alt="">CALL</span>
+              <span><img class="legend-sprite" src="assets/ppt.png" alt="">PPT</span>
+              <span><img class="legend-sprite" src="assets/docx.png" alt="">DOCX</span>
+              <span><img class="legend-sprite" src="assets/cpu.png" alt="">CPU</span>
+              <span><img class="legend-sprite" src="assets/no access file.png" alt="">LOST FILES</span>
+              <span><img class="legend-sprite" src="assets/ticket jira.png" alt="">TICKET JIRA</span>
+              <span><img class="legend-sprite" src="assets/12h!!!!.png" alt="">12H!!!!</span>
+              <span><img class="legend-sprite" src="assets/error 404.png" alt="">ERROR 404</span>
+              <span><img class="legend-sprite" src="assets/windouf update.png" alt="">WINDOUF UPDATE</span>
+              <span><img class="legend-sprite" src="assets/ref_is_down.png" alt="">REF IS DOWN!</span>
+              <span><img class="legend-sprite" src="assets/dgc.png" alt="">DGC</span>
+              <span><img class="legend-sprite" src="assets/as400.png" alt="">AS400</span>
+              <span><img class="legend-sprite" src="assets/praatbarak.png" alt="">PRAAT BARAK</span>
+              <span><img class="legend-sprite" src="assets/lazy loading.png" alt="">LAZY LOADING</span>
+              <span><img class="legend-sprite" src="assets/infinite versions.png" alt="">INFINITE VERSIONS</span>
+            </div>
+          </section>
+          <p class="warning-strip">▲ PAY ATTENTION! · L'OUTBOX surchauffe si tu es frénétique avec la barre ESPACE - Be cool if not c'est le Burnout.</p>
+        </div>
+
+        <div id="pauseScreen" class="overlay">
+          <h2>PAUSED</h2>
+          <p>Press P or resume when your focus returns.</p>
+          <button data-action="resume">RESUME</button>
+          <button data-action="restart">RESTART</button>
+        </div>
+
+        <div id="gameOverScreen" class="overlay game-over-panel">
+          <h2>GAME OVER</h2>
+          <p id="gameOverText">Les distractions ont atteint ton bureau. Score : 0</p>
+          <div class="game-over-actions">
+            <button data-action="restart">REJOUER</button>
+            <button data-action="scores">SCORES</button>
+            <button data-action="back">RETOUR</button>
+          </div>
+        </div>
+
+        <div id="victoryScreen" class="overlay">
+          <h2>VICTORY</h2>
+          <p>You reached inbox zero. For now.</p>
+          <button data-action="restart">PLAY AGAIN</button>
+          <button data-action="scores">SCORES</button>
+        </div>
+
+        <div id="leaderboardScreen" class="overlay redesign-screen leaderboard-panel">
+          <p class="screen-kicker" id="leaderboardMode">LOCAL SCORES</p>
+          <h2>LEADERBOARD</h2>
+          <ol id="leaderboardList" class="leaderboard-list redesigned-board"></ol>
+        </div>
+      </section>
+    </main>
+
+    <section class="mobile-controls" aria-label="Mobile controls">
+      <div class="mobile-pad">
+        <button id="touchUp" aria-label="Move up">UP</button>
+        <button id="touchLeft" aria-label="Move left">LEFT</button>
+        <button id="touchDown" aria-label="Move down">DOWN</button>
+        <button id="touchRight" aria-label="Move right">RIGHT</button>
+      </div>
+      <div class="mobile-actions">
+        <button id="touchShoot" aria-label="Shoot">SHOOT</button>
+        <button id="touchReply" aria-label="Reply All spread shot">REPLY</button>
+        <button id="touchBlast" aria-label="Focus blast">BLAST</button>
+      </div>
+    </section>
+
+    <script src="assets/invaders-sprites.js?v=20260609c"></script>
+    <script src="game.js?v=20260612a"></script>
+  </body>
+</html>
