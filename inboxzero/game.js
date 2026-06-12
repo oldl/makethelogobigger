@@ -39,8 +39,8 @@ const screens = {
 let W = canvas.width;
 let H = canvas.height;
 const colors = ["#34d957", "#19e3e3", "#ff3d9a", "#ffd23d", "#ff3b3b"];
-const enemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "lazy_loading", "infinite_versions"];
-const fallbackEnemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "lazy_loading", "infinite_versions"];
+const enemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
+const fallbackEnemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
 const enemyLabels = {
   email: "EMAIL",
   meeting: "DOUBLE MEETING",
@@ -57,6 +57,10 @@ const enemyLabels = {
   dgc: "DGC",
   as400: "AS400",
   praat_barak: "PRAAT BARAK",
+  last_update: "LAST UPDATE",
+  mfa_loop: "MFA LOOP",
+  vpn_down: "VPN DOWN",
+  security_patch: "SECURITY PATCH",
   lazy_loading: "LAZY LOADING",
   infinite_versions: "INFINITE VERSIONS",
   question: "ERROR 404"
@@ -77,6 +81,10 @@ const enemyLabelColors = {
   dgc: "#ffd23d",
   as400: "#34d957",
   praat_barak: "#ff3d9a",
+  last_update: "#ff8a1a",
+  mfa_loop: "#b56cff",
+  vpn_down: "#19e3e3",
+  security_patch: "#ffd23d",
   lazy_loading: "#9bffff",
   infinite_versions: "#b56cff",
   question: "#7cff4f"
@@ -97,12 +105,19 @@ const imageSpriteSources = {
   dgc: "assets/dgc.png",
   as400: "assets/as400.png",
   praat_barak: "assets/praatbarak.png",
+  last_update: "assets/7311083a-2ebb-4465-ae2c-28606e0e98e7_removalai_preview.png",
+  mfa_loop: "assets/ca6b6877-e752-4e89-9191-3670797ed381_removalai_preview.png",
+  vpn_down: "assets/12599df6-1e90-4584-9417-eee2061a4efa_removalai_preview.png",
+  boss_special_shot: "assets/e4a37a65-ab33-4795-914c-9910bc2f18b8_removalai_preview.png",
+  security_patch: "assets/992d3e03-5cb6-4455-8b45-6aff71827215_removalai_preview.png",
   lazy_loading: "assets/lazy loading.png",
   infinite_versions: "assets/infinite versions.png",
   boss_cc: "assets/boss_cc emails.png",
   boss_contradictory: "assets/boss_contradictory information.png",
   boss_printer: "assets/boss_printer.png",
   boss_monday: "assets/boss_monday.png",
+  boss_passkey: "assets/7b47e6e9-510a-4887-9207-0725d9d68171_removalai_preview.png",
+  boss_sunday_release: "assets/B1DD-A689-470E-B0A8-D6C5D34ECE0E_1-removebg-preview.png",
   cover_printer: "assets/boss_printer.png",
   cover_clock: "assets/12h!!!!.png",
   cover_spot: "assets/defender_spot.png",
@@ -149,9 +164,11 @@ const bossNames = [
   "CC EMAILS",
   "CONTRADICTORY INFORMATION",
   "PRINTER",
-  "MONDAY"
+  "MONDAY",
+  "PASSKEY",
+  "SUNDAY RELEASE"
 ];
-const bossSpriteKeys = ["boss_cc", "boss_contradictory", "boss_printer", "boss_monday"];
+const bossSpriteKeys = ["boss_cc", "boss_contradictory", "boss_printer", "boss_monday", "boss_passkey", "boss_sunday_release"];
 const MAX_LIVES = 5;
 const MAX_LEVEL = 16;
 const LAST_CHANCE_FOCUS_COST = 60;
@@ -646,7 +663,7 @@ function beginLevel() {
   const difficulty = levelDifficulty();
   if (level % 2 === 0) {
     const bossIndex = Math.floor(level / 2 - 1);
-    const bossHp = Math.floor(70 + difficulty * 30 + Math.max(0, level - 10) * 22);
+    const bossHp = Math.floor(90 + difficulty * 36 + Math.max(0, level - 10) * 30);
     boss = {
       x: W / 2 - 120,
       y: 60,
@@ -654,20 +671,20 @@ function beginLevel() {
       h: 118,
       hp: bossHp,
       maxHp: bossHp,
-      vx: 82 + difficulty * 9,
+      vx: 96 + difficulty * 11,
       name: bossNames[bossIndex % bossNames.length],
       spriteKey: bossSpriteKeys[bossIndex % bossSpriteKeys.length]
     };
-    waveRemaining = 7 + Math.floor(difficulty * 1.4);
+    waveRemaining = 9 + Math.floor(difficulty * 2.1);
   } else {
-    waveRemaining = 13 + Math.floor(difficulty * 5.2);
+    waveRemaining = 16 + Math.floor(difficulty * 6.4);
   }
   createCoverObjects();
 }
 
 function levelDifficulty() {
   const lateGame = Math.max(0, level - 10);
-  return level + lateGame * 0.65;
+  return level * 1.18 + lateGame * 0.85;
 }
 
 function createCoverObjects() {
@@ -975,7 +992,7 @@ function spawnEnemy() {
   const spawnTypes = availableTypes.length >= fallbackEnemyTypes.length ? availableTypes : fallbackEnemyTypes;
   const type = spawnTypes[Math.floor(Math.random() * spawnTypes.length)];
   const difficulty = levelDifficulty();
-  const fast = Math.random() < Math.min(0.12 + difficulty * 0.022, 0.52);
+  const fast = Math.random() < Math.min(0.18 + difficulty * 0.026, 0.64);
   const mainEnemy = createEnemy(type, fast, difficulty);
   enemies.push(mainEnemy);
   if (type === "dgc" && Math.random() < 0.72) {
@@ -989,9 +1006,9 @@ function spawnEnemy() {
 }
 
 function createEnemy(type, fast, difficulty) {
-  const size = type === "as400" ? (fast ? 96 : 92) : (fast ? 90 : 82);
-  const hp = type === "as400" ? (fast ? 4 : 3) : (type === "blue_screen" ? 2 : 1);
-  const speedMod = type === "as400" ? 0.62 : (type === "praat_barak" ? 1.08 : 1);
+  const size = type === "as400" ? (fast ? 96 : 92) : (["last_update", "mfa_loop", "vpn_down", "security_patch"].includes(type) ? (fast ? 88 : 80) : (fast ? 90 : 82));
+  const hp = type === "as400" ? (fast ? 4 : 3) : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" ? 2 : 1);
+  const speedMod = type === "as400" ? 0.66 : (type === "praat_barak" ? 1.18 : (type === "last_update" ? 1.28 : (type === "vpn_down" ? 1.15 : (type === "security_patch" ? 0.82 : 1))));
   return {
     type,
     fast,
@@ -1001,15 +1018,15 @@ function createEnemy(type, fast, difficulty) {
     h: size,
     hp,
     maxHp: hp,
-    scoreValue: type === "as400" ? 28 : (type === "blue_screen" ? 18 : null),
-    vx: (Math.random() - 0.5) * (35 + difficulty * 8.5) * speedMod,
-    vy: ((fast ? 94 : 58) + difficulty * 11.8) * speedMod,
+    scoreValue: type === "as400" ? 28 : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" ? 18 : null),
+    vx: (Math.random() - 0.5) * (46 + difficulty * 10.8) * speedMod,
+    vy: ((fast ? 112 : 68) + difficulty * 14.5) * speedMod,
     color: fast ? "#ff3b3b" : (enemyLabelColors[type] || colors[Math.floor(Math.random() * colors.length)]),
     wobble: Math.random() * Math.PI * 2,
-    zigzag: type === "praat_barak" ? 1 : 0,
-    zigzagAmp: type === "praat_barak" ? 78 + Math.random() * 38 : 24,
-    zigzagRate: type === "praat_barak" ? 5.8 + Math.random() * 1.2 : 4,
-    shotTimer: 1.1 + Math.random() * Math.max(0.65, 3.4 - difficulty * 0.09)
+    zigzag: type === "praat_barak" || type === "vpn_down" ? 1 : 0,
+    zigzagAmp: type === "praat_barak" ? 78 + Math.random() * 38 : (type === "vpn_down" ? 54 + Math.random() * 42 : 24),
+    zigzagRate: type === "praat_barak" ? 5.8 + Math.random() * 1.2 : (type === "vpn_down" ? 6.8 + Math.random() * 1.6 : 4),
+    shotTimer: 0.85 + Math.random() * Math.max(0.5, 2.8 - difficulty * 0.1)
   };
 }
 
@@ -1026,11 +1043,11 @@ function shootEnemy(enemy) {
     [-70, 0, 70].forEach(vx => pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, vx, speed, 8, 18));
   } else if (enemy.type === "blue_screen") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.18, speed * 0.58, 24, 30);
-  } else if (enemy.type === "ppt" || enemy.type === "word" || enemy.type === "lazy_loading" || enemy.type === "infinite_versions" || enemy.type === "as400") {
+  } else if (enemy.type === "ppt" || enemy.type === "word" || enemy.type === "lazy_loading" || enemy.type === "infinite_versions" || enemy.type === "as400" || enemy.type === "mfa_loop" || enemy.type === "security_patch") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.35, speed * 0.78, 14, 24);
-  } else if (enemy.type === "jira" || enemy.type === "chat" || enemy.type === "windouf" || enemy.type === "praat_barak") {
+  } else if (enemy.type === "jira" || enemy.type === "chat" || enemy.type === "windouf" || enemy.type === "praat_barak" || enemy.type === "vpn_down") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, (Math.random() > 0.5 ? 1 : -1) * 95, speed * 0.95, 8, 18, 56);
-  } else if (enemy.type === "urgent") {
+  } else if (enemy.type === "urgent" || enemy.type === "last_update") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.45, speed * 1.32, 8, 22);
   } else {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, 0, speed, 8, 18);
@@ -1044,7 +1061,7 @@ function aimedVelocity(fromX, fromY, toX, toY, speed) {
   return { vx: (dx / length) * speed, vy: (dy / length) * speed };
 }
 
-function pushEnemyBullet(x, y, vx, vy, w, h, wobble = 0) {
+function pushEnemyBullet(x, y, vx, vy, w, h, wobble = 0, spriteKey = "enemy_shot") {
   enemyBullets.push({
     x,
     y,
@@ -1053,6 +1070,7 @@ function pushEnemyBullet(x, y, vx, vy, w, h, wobble = 0) {
     vx,
     vy,
     wobble,
+    spriteKey,
     seed: Math.random() * 10
   });
 }
@@ -1132,9 +1150,10 @@ function maybeDropPowerup(x, y) {
 
 function pickPowerupType() {
   const roll = Math.random();
-  if (roll < 0.55) return POWERUP_TYPES.find(powerup => powerup.key === "vendredi");
-  if (roll < 0.78) return POWERUP_TYPES.find(powerup => powerup.key === "star");
-  return POWERUP_TYPES[Math.floor(Math.random() * POWERUP_TYPES.length)];
+  if (roll < 0.12) return POWERUP_TYPES.find(powerup => powerup.key === "vendredi");
+  if (roll < 0.38) return POWERUP_TYPES.find(powerup => powerup.key === "star");
+  const regularPowerups = POWERUP_TYPES.filter(powerup => powerup.key !== "vendredi");
+  return regularPowerups[Math.floor(Math.random() * regularPowerups.length)];
 }
 
 function collectPowerup(powerup) {
@@ -1242,7 +1261,7 @@ function dolphinWave(color) {
 
 function vendrediMode(color) {
   vendrediSplashTimer = 3.4;
-  vendrediBonusTimer = 12;
+  vendrediBonusTimer = 8;
   oooTimer = Math.max(oooTimer, 12);
   player.invincible = Math.max(player.invincible, 5);
   replyAllCooldown = 0;
@@ -1383,7 +1402,7 @@ function update(dt) {
   if (waveRemaining > 0 && spawnTimer <= 0) {
     spawnEnemy();
     waveRemaining -= 1;
-    spawnTimer = Math.max(0.12, 0.82 - levelDifficulty() * 0.044);
+    spawnTimer = Math.max(0.08, 0.7 - levelDifficulty() * 0.052);
   }
 
   bullets.forEach(b => {
@@ -1416,15 +1435,20 @@ function update(dt) {
     if (boss.x < 24 || boss.x + boss.w > W - 24) boss.vx *= -1;
     if (bossShootCooldown <= 0) {
       const difficulty = levelDifficulty();
-      const shots = level >= 12 ? [-48, -24, 0, 24, 48] : (level >= 6 ? [-28, 0, 28] : [0]);
-      shots.forEach(offset => enemyBullets.push({
-        x: boss.x + boss.w / 2 + offset,
-        y: boss.y + boss.h,
-        w: 8,
-        h: 18,
-        vx: offset * 1.9,
-        vy: 160 + difficulty * 20
-      }));
+      const isSecurityBoss = boss.spriteKey === "boss_passkey" || boss.spriteKey === "boss_sunday_release";
+      const shots = isSecurityBoss
+        ? (level >= 12 ? [-64, -32, 0, 32, 64] : [-34, 0, 34])
+        : (level >= 12 ? [-48, -24, 0, 24, 48] : (level >= 6 ? [-28, 0, 28] : [0]));
+      shots.forEach(offset => pushEnemyBullet(
+        boss.x + boss.w / 2 + offset,
+        boss.y + boss.h,
+        offset * (isSecurityBoss ? 2.4 : 1.9),
+        (isSecurityBoss ? 190 : 160) + difficulty * (isSecurityBoss ? 24 : 20),
+        isSecurityBoss ? 18 : 8,
+        isSecurityBoss ? 30 : 18,
+        isSecurityBoss ? 28 : 0,
+        isSecurityBoss ? "boss_special_shot" : "enemy_shot"
+      ));
       bossShootCooldown = Math.max(0.42, 1.5 - difficulty * 0.07);
     }
   }
@@ -1896,7 +1920,9 @@ function drawCoverIcon(cover) {
 function drawEnemyBullet(b) {
   ctx.save();
   const angle = b.vx ? Math.atan2(-(b.vx || 0), b.vy || 1) : 0;
-  const spriteDrawn = drawRotatedImageSprite("enemy_shot", b.x, b.y + b.h / 2, Math.max(34, b.h + 18), angle, "#ff3b3b", 13);
+  const spriteKey = b.spriteKey || "enemy_shot";
+  const spriteColor = spriteKey === "boss_special_shot" ? "#ffd23d" : "#ff3b3b";
+  const spriteDrawn = drawRotatedImageSprite(spriteKey, b.x, b.y + b.h / 2, Math.max(spriteKey === "boss_special_shot" ? 54 : 34, b.h + 18), angle, spriteColor, spriteKey === "boss_special_shot" ? 18 : 13);
   if (!spriteDrawn) {
     glow("#ff3b3b", 11);
     ctx.fillStyle = "#ff3b3b";
