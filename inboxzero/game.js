@@ -66,7 +66,7 @@ const enemyLabels = {
   last_update: "PASSKEY",
   mfa_loop: "EASY FORM",
   vpn_down: "SUNDAY RELEASE",
-  security_patch: "HANDOVER",
+  security_patch: "SECURITY PATCH",
   lazy_loading: "LAZY LOADING",
   infinite_versions: "INFINITE VERSIONS",
   question: "ERROR 404"
@@ -223,6 +223,7 @@ const SPRITE_DETAILS = {
   "MAGNOLIA": "Update CMS fleuri. Joli à regarder, moins joli quand ça casse la prod.",
   "CONSULTANT": "Arrive avec des slides, des graphes et une question simple qui coûte cher.",
   "HANDOVER": "Transfert de dossier. Si tu rates le relais, tout revient dans ton inbox.",
+  "SECURITY PATCH": "Correctif de sécurité pressé. Solide, lent, et toujours plus urgent que prévu.",
   "PASSKEY": "Clé magique d'authentification. Utile, mais elle adore expirer au pire moment.",
   "EASY FORM": "Formulaire prétendument simple. Il cache toujours un champ obligatoire invisible.",
   "SUNDAY RELEASE": "Release du dimanche. Personne ne sait pourquoi elle existe, tout le monde la subit.",
