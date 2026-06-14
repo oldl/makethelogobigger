@@ -215,7 +215,7 @@ const SPRITE_DETAILS = {
   "ROCK & ROLLBACK": "Rollback du dimanche midi. Il était censé sauver la prod. Il a choisi le chaos. Ton rosbif est brûlé",
   "WINDOUF UPDATE": "Mise à jour sauvage. Elle débarque quand tout allait presque bien.",
   "REF IS DOWN!": "Miroir de la production. Refuse obstinément de refléter quoi que ce soit."
-  "DGC": "Fossile du département IT. Chaque ouverture est un pari contre le destin.”",
+  "DGC": "Fossile du département IT. Chaque ouverture est un pari contre le destin.",
   "AS400": "Ancien système, énorme inertie. Peu rapide, mais il encaisse comme un serveur oublié.",
   "PRAAT BARAK": "Parle beaucoup, bouge bizarrement, perturbe les trajectoires propres.Risque d'envoutement en phase de digestion.",
   "PO AU JAPON": "Beau, calme, GMT +9h. Maître du fuseau horaire. Attaque : peut transformer un Daily en réunion de nuit.",
