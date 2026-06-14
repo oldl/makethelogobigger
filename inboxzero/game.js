@@ -39,8 +39,8 @@ const screens = {
 let W = canvas.width;
 let H = canvas.height;
 const colors = ["#34d957", "#19e3e3", "#ff3d9a", "#ffd23d", "#ff3b3b"];
-const enemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
-const fallbackEnemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
+const enemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "rock", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
+const fallbackEnemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "rock", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
 const enemyLabels = {
   email: "EMAIL",
   meeting: "DOUBLE MEETING",
@@ -52,6 +52,7 @@ const enemyLabels = {
   jira: "TICKET JIRA",
   urgent: "12H!!!!",
   popup: "ERROR 404",
+  rock: "ROCK",
   windouf: "WINDOUF UPDATE",
   blue_screen: "REF IS DOWN!",
   dgc: "DGC",
@@ -81,6 +82,7 @@ const enemyLabelColors = {
   jira: "#ff3d9a",
   urgent: "#ff3b3b",
   popup: "#7cff4f",
+  rock: "#9b92c8",
   windouf: "#36a3ff",
   blue_screen: "#2f7dff",
   dgc: "#ffd23d",
@@ -110,6 +112,7 @@ const imageSpriteSources = {
   jira: "assets/ticket jira.png",
   urgent: "assets/12h!!!!.png",
   popup: "assets/error 404.png",
+  rock: "assets/rock.png",
   windouf: "assets/windouf update.png",
   blue_screen: "assets/ref_is_down.png",
   dgc: "assets/dgc.png",
@@ -151,6 +154,7 @@ const imageSpriteSources = {
   star: "assets/qap.png",
   dolphin: "assets/bonus_dolphin.png",
   vendredi: "assets/bonus_vendredi_15h.png",
+  cannabis: "assets/cannabis.png",
   vendredi_rainbow: "assets/rainbow.png",
   player_ship: "assets/spaceship.png",
   player_ship_rainbow: "assets/spaceship_rainbow.png",
@@ -190,12 +194,52 @@ const MAX_HEAT = 100;
 const SUPABASE_URL = "https://ebhpkgjlzvbfwpucofho.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_LGHW2HETXjgHS1slv1DQGQ_ty2n4LzU";
 const SCORE_TABLE = "inbox_scores";
+const SPRITE_DETAILS = {
+  "COFFEE": "Accélère ta cadence de tir et rend le bureau franchement plus productif pendant quelques secondes.",
+  "HONEY": "Pose un champ collant: les distractions ralentissent et les projectiles se calment.",
+  "CLIP": "Le trombone allié fait le ménage sur les menaces les plus proches. Old school, mais efficace.",
+  "QAP": "Tir perforant x3. Le bonus préféré des pilotes qui n'ont pas le temps de négocier.",
+  "DOLPHIN": "Dash esquive: une vague rapide pour sortir d'une situation qui sent la réunion surprise.",
+  "VENDREDI": "Ralentit le temps. À 15h, même les invaders commencent à regarder l'horloge.",
+  "CANNABIS": "Mode chill magique: ralentit le chaos, refroidit l'Outbox et transforme tes tirs en bonnes idées.",
+  "EMAIL": "La distraction de base. Se multiplie vite si tu la laisses traîner dans l'inbox.",
+  "DOUBLE MEETING": "Deux réunions dans la même case agenda. Rien d'illégal, mais tout est suspect.",
+  "CALL": "Appel entrant qui vise juste. À traiter avant qu'il ne coupe ton flow.",
+  "PPT": "Deck interminable. Lent, lourd, et toujours une slide de trop.",
+  "DOCX": "Document mutant. Il tire proprement, mais il revient toujours avec des commentaires.",
+  "CPU": "Processus qui chauffe. Rapide à ignorer, dangereux à laisser tourner.",
+  "LOST FILES": "Fichier perdu, panique garantie. Zigzague dans le backlog en prétendant être urgent.",
+  "TICKET JIRA": "Petit mais procédurier. Il arrive avec un statut, une priorité et zéro contexte.",
+  "12H!!!!": "Deadline midi. Fonce droit sur toi avec l'énergie du message envoyé trop tard.",
+  "ERROR 404": "Pop-up absurde. Tire en éventail parce que l'information est introuvable.",
+  "ROCK": "Blocage solide. Lent, costaud, parfait pour casser ton rythme si tu ne le focus pas.",
+  "WINDOUF UPDATE": "Mise à jour sauvage. Elle débarque quand tout allait presque bien.",
+  "REF IS DOWN!": "Incident de prod déguisé en écran bleu. Résistant et franchement pénible.",
+  "DGC": "Petit groupe compact qui aime arriver en renfort. À nettoyer avant l'effet boule de neige.",
+  "AS400": "Ancien système, énorme inertie. Peu rapide, mais il encaisse comme un serveur oublié.",
+  "PRAAT BARAK": "Parle beaucoup, bouge bizarrement, perturbe les trajectoires propres.",
+  "PO AU JAPON": "Décalage horaire incarné. Beau, calme, mais jamais disponible au bon moment.",
+  "EZF": "Formulaire facile en théorie. En pratique: deux points de vie et une validation de trop.",
+  "MAGNOLIA": "Update CMS fleuri. Joli à regarder, moins joli quand ça casse la prod.",
+  "CONSULTANT": "Arrive avec des slides, des graphes et une question simple qui coûte cher.",
+  "HANDOVER": "Transfert de dossier. Si tu rates le relais, tout revient dans ton inbox.",
+  "PASSKEY": "Clé magique d'authentification. Utile, mais elle adore expirer au pire moment.",
+  "EASY FORM": "Formulaire prétendument simple. Il cache toujours un champ obligatoire invisible.",
+  "SUNDAY RELEASE": "Release du dimanche. Personne ne sait pourquoi elle existe, tout le monde la subit.",
+  "LAZY LOADING": "Charge quand ça l'arrange. Lent à venir, agaçant à finir.",
+  "INFINITE VERSIONS": "Versions infinies, vérité zéro. Plus tu tires, plus ça ressemble à un drive partagé.",
+  "CC EMAILS": "Boss de la copie cachée visible. Il transforme une info simple en pluie de réponses.",
+  "CONTRADICTORY INFORMATION": "Boss de la contradiction. Chaque tentacule raconte une version différente.",
+  "PRINTER": "Boss imprimante. Ancienne magie noire, bourrages papier et colère froide.",
+  "MONDAY MORNING": "Boss du lundi matin. Trop tôt, trop gros, trop de notifications."
+};
 const POWERUP_TYPES = [
   { key: "coffee", label: "BONNUS COFFEE", color: "#ffd23d" },
   { key: "honey", label: "BONUS HONEY", color: "#ff8a1a" },
   { key: "clip", label: "BONUS CLIP", color: "#19e3e3" },
   { key: "star", label: "QAP", color: "#ff3d9a" },
   { key: "dolphin", label: "BONUS DOLPHIN", color: "#58d6ff" },
+  { key: "cannabis", label: "CANNABIS MAGIQUE", color: "#b6ff2e" },
   { key: "vendredi", label: "BONUS VENDREDI 15H", color: "#b6e021" }
 ];
 const COVER_TYPES = [
@@ -242,6 +286,7 @@ let overheated = false;
 let heatNoticeCooldown = 0;
 let vendrediSplashTimer = 0;
 let vendrediBonusTimer = 0;
+let cannabisTimer = 0;
 let dolphinWaveTimer = 0;
 let levelTransition = 0;
 let waveRemaining = 0;
@@ -453,6 +498,7 @@ function resetGame() {
   heatNoticeCooldown = 0;
   vendrediSplashTimer = 0;
   vendrediBonusTimer = 0;
+  cannabisTimer = 0;
   dolphinWaveTimer = 0;
   levelTransition = 0;
   beginLevel();
@@ -1019,9 +1065,9 @@ function spawnEnemy() {
 }
 
 function createEnemy(type, fast, difficulty) {
-  const size = type === "as400" ? (fast ? 96 : 92) : (["last_update", "mfa_loop", "vpn_down", "security_patch", "po_japon", "ezf", "magnolia", "consultant", "handover"].includes(type) ? (fast ? 88 : 80) : (fast ? 90 : 82));
-  const hp = type === "as400" ? (fast ? 4 : 3) : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" || type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" ? 2 : 1);
-  const speedMods = { as400: 0.66, praat_barak: 1.18, po_japon: 1.08, ezf: 0.94, magnolia: 0.9, last_update: 1.28, vpn_down: 1.15, security_patch: 0.82, consultant: 0.96, handover: 0.92 };
+  const size = type === "rock" ? (fast ? 98 : 92) : (type === "as400" ? (fast ? 96 : 92) : (["last_update", "mfa_loop", "vpn_down", "security_patch", "po_japon", "ezf", "magnolia", "consultant", "handover"].includes(type) ? (fast ? 88 : 80) : (fast ? 90 : 82)));
+  const hp = type === "rock" ? (fast ? 4 : 3) : (type === "as400" ? (fast ? 4 : 3) : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" || type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" ? 2 : 1));
+  const speedMods = { rock: 0.7, as400: 0.66, praat_barak: 1.18, po_japon: 1.08, ezf: 0.94, magnolia: 0.9, last_update: 1.28, vpn_down: 1.15, security_patch: 0.82, consultant: 0.96, handover: 0.92 };
   const speedMod = speedMods[type] || 1;
   return {
     type,
@@ -1032,7 +1078,7 @@ function createEnemy(type, fast, difficulty) {
     h: size,
     hp,
     maxHp: hp,
-    scoreValue: type === "as400" ? 28 : (type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" ? 24 : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" ? 18 : null)),
+    scoreValue: type === "as400" ? 28 : (type === "rock" ? 26 : (type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" ? 24 : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" ? 18 : null))),
     vx: (Math.random() - 0.5) * (46 + difficulty * 10.8) * speedMod,
     vy: ((fast ? 112 : 68) + difficulty * 14.5) * speedMod,
     color: fast ? "#ff3b3b" : (enemyLabelColors[type] || colors[Math.floor(Math.random() * colors.length)]),
@@ -1057,7 +1103,7 @@ function shootEnemy(enemy) {
     [-70, 0, 70].forEach(vx => pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, vx, speed, 8, 18));
   } else if (enemy.type === "blue_screen") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.18, speed * 0.58, 24, 30);
-  } else if (enemy.type === "ppt" || enemy.type === "word" || enemy.type === "lazy_loading" || enemy.type === "infinite_versions" || enemy.type === "as400" || enemy.type === "mfa_loop" || enemy.type === "security_patch" || enemy.type === "ezf" || enemy.type === "magnolia" || enemy.type === "consultant" || enemy.type === "handover") {
+  } else if (enemy.type === "ppt" || enemy.type === "word" || enemy.type === "rock" || enemy.type === "lazy_loading" || enemy.type === "infinite_versions" || enemy.type === "as400" || enemy.type === "mfa_loop" || enemy.type === "security_patch" || enemy.type === "ezf" || enemy.type === "magnolia" || enemy.type === "consultant" || enemy.type === "handover") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.35, speed * 0.78, 14, 24);
   } else if (enemy.type === "jira" || enemy.type === "chat" || enemy.type === "windouf" || enemy.type === "praat_barak" || enemy.type === "vpn_down" || enemy.type === "po_japon") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, (Math.random() > 0.5 ? 1 : -1) * 95, speed * 0.95, 8, 18, 56);
@@ -1091,7 +1137,8 @@ function pushEnemyBullet(x, y, vx, vy, w, h, wobble = 0, spriteKey = "enemy_shot
 
 function fire() {
   if (shootCooldown > 0) return;
-  if (!spendHeat(coffeeTimer > 0 ? 5 : 8)) return;
+  const cannabisActive = cannabisTimer > 0;
+  if (!spendHeat(cannabisActive ? 4 : (coffeeTimer > 0 ? 5 : 8))) return;
   [-8, 8].forEach(offset => {
     bullets.push({
       x: player.x + offset,
@@ -1100,8 +1147,9 @@ function fire() {
       h: 24,
       vx: 0,
       vy: -650,
-      damage: 9,
-      color: "#ffd23d"
+      damage: cannabisActive ? 11 : 9,
+      color: cannabisActive ? (offset < 0 ? "#b6ff2e" : "#d65bff") : "#ffd23d",
+      pierce: cannabisActive ? 1 : 0
     });
   });
   shootCooldown = 0.14;
@@ -1164,9 +1212,10 @@ function maybeDropPowerup(x, y) {
 
 function pickPowerupType() {
   const roll = Math.random();
-  if (roll < 0.12) return POWERUP_TYPES.find(powerup => powerup.key === "vendredi");
-  if (roll < 0.38) return POWERUP_TYPES.find(powerup => powerup.key === "star");
-  const regularPowerups = POWERUP_TYPES.filter(powerup => powerup.key !== "vendredi");
+  if (roll < 0.1) return POWERUP_TYPES.find(powerup => powerup.key === "vendredi");
+  if (roll < 0.24) return POWERUP_TYPES.find(powerup => powerup.key === "cannabis");
+  if (roll < 0.46) return POWERUP_TYPES.find(powerup => powerup.key === "star");
+  const regularPowerups = POWERUP_TYPES.filter(powerup => powerup.key !== "vendredi" && powerup.key !== "cannabis");
   return regularPowerups[Math.floor(Math.random() * regularPowerups.length)];
 }
 
@@ -1194,6 +1243,8 @@ function collectPowerup(powerup) {
     dolphinWave(powerup.color);
   } else if (powerup.key === "vendredi") {
     vendrediMode(powerup.color);
+  } else if (powerup.key === "cannabis") {
+    cannabisMode(powerup.color);
   }
   focus = Math.min(100, focus + 12);
   tone(880, 0.08, "square", 0.045, 240);
@@ -1271,6 +1322,20 @@ function dolphinWave(color) {
   outboxHeat = Math.max(0, outboxHeat - 35);
   addNotice(targets.length ? `DOLPHIN WAVE x${targets.length}` : "DOLPHIN WAVE: CLEAR SHOTS", color);
   blastSound();
+}
+
+function cannabisMode(color) {
+  cannabisTimer = 7;
+  oooTimer = Math.max(oooTimer, 7);
+  outboxHeat = Math.max(0, outboxHeat - 65);
+  enemyBullets.forEach(bullet => {
+    bullet.vx *= 0.52;
+    bullet.vy *= 0.5;
+  });
+  enemies.forEach(enemy => addExplosion(enemy.x, enemy.y, color, 10));
+  addNotice("CANNABIS MAGIQUE: MODE CHILL", color);
+  tone(523.25, 0.12, "triangle", 0.045, 180);
+  tone(783.99, 0.16, "sine", 0.035, 260);
 }
 
 function vendrediMode(color) {
@@ -1379,10 +1444,11 @@ function update(dt) {
   coffeeTimer = Math.max(0, coffeeTimer - dt);
   bubbleTimer = Math.max(0, bubbleTimer - dt);
   oooTimer = Math.max(0, oooTimer - dt);
-  outboxHeat = Math.max(0, outboxHeat - dt * (overheated ? 34 : coffeeTimer > 0 ? 27 : 18));
+  outboxHeat = Math.max(0, outboxHeat - dt * (cannabisTimer > 0 ? 48 : overheated ? 34 : coffeeTimer > 0 ? 27 : 18));
   heatNoticeCooldown = Math.max(0, heatNoticeCooldown - dt);
   vendrediSplashTimer = Math.max(0, vendrediSplashTimer - dt);
   vendrediBonusTimer = Math.max(0, vendrediBonusTimer - dt);
+  cannabisTimer = Math.max(0, cannabisTimer - dt);
   dolphinWaveTimer = Math.max(0, dolphinWaveTimer - dt);
   if (overheated && outboxHeat <= 38) {
     overheated = false;
@@ -1428,7 +1494,7 @@ function update(dt) {
   enemies.forEach(enemy => {
     enemy.wobble += dt * (enemy.zigzag ? enemy.zigzagRate : 4);
     enemy.shotTimer -= dt;
-    const enemySlow = oooTimer > 0 ? 0.42 : 1;
+    const enemySlow = cannabisTimer > 0 ? 0.4 : (oooTimer > 0 ? 0.42 : 1);
     const lateralWobble = Math.sin(enemy.wobble) * (enemy.zigzag ? enemy.zigzagAmp : 24);
     enemy.x += (enemy.vx + lateralWobble) * dt * enemySlow;
     enemy.y += enemy.vy * dt * enemySlow;
@@ -1445,7 +1511,7 @@ function update(dt) {
   });
 
   if (boss) {
-    boss.x += boss.vx * dt * (oooTimer > 0 ? 0.45 : 1);
+    boss.x += boss.vx * dt * (cannabisTimer > 0 ? 0.4 : (oooTimer > 0 ? 0.45 : 1));
     if (boss.x < 24 || boss.x + boss.w > W - 24) boss.vx *= -1;
     if (bossShootCooldown <= 0) {
       const difficulty = levelDifficulty();
@@ -1463,7 +1529,7 @@ function update(dt) {
   }
 
   enemyBullets.forEach(b => {
-    const bulletSlow = oooTimer > 0 ? 0.55 : 1;
+    const bulletSlow = cannabisTimer > 0 ? 0.5 : (oooTimer > 0 ? 0.55 : 1);
     b.x += (b.vx || 0) * dt * bulletSlow;
     b.y += b.vy * dt * bulletSlow;
     if (b.wobble) b.x += Math.sin((performance.now() / 1000 + b.seed) * 7) * b.wobble * dt;
@@ -1520,7 +1586,8 @@ function handleCollisions() {
   for (const bullet of bullets) {
     for (const enemy of enemies) {
       if (!enemy.dead && hit(bullet, enemy)) {
-        if (!bullet.replyAll) bullet.dead = true;
+        if (bullet.pierce > 0) bullet.pierce -= 1;
+        else if (!bullet.replyAll) bullet.dead = true;
         enemy.hp = (enemy.hp || 1) - (bullet.damage || 1);
         addExplosion(bullet.x || enemy.x, bullet.y || enemy.y, bullet.color || enemy.color, enemy.hp > 0 ? 6 : 18);
         if (enemy.hp <= 0) {
@@ -1537,6 +1604,7 @@ function handleCollisions() {
       }
     }
     if (boss && hit(bullet, boss)) {
+      if (bullet.pierce > 0) bullet.pierce = 0;
       bullet.dead = true;
       boss.hp -= bullet.damage || 8;
       score += bullet.replyAll ? 12 : 5;
@@ -1763,9 +1831,9 @@ function drawPowerups() {
     ctx.save();
     glow(powerup.color, 16);
     ctx.translate(powerup.x, powerup.y);
-    const spriteSize = powerup.key === "star" ? 86 : 62;
-    const labelY = powerup.key === "star" ? 31 : 23;
-    const labelTop = powerup.key === "star" ? 23 : 15;
+    const spriteSize = powerup.key === "star" ? 86 : (powerup.key === "cannabis" ? 76 : 62);
+    const labelY = powerup.key === "star" ? 31 : (powerup.key === "cannabis" ? 29 : 23);
+    const labelTop = powerup.key === "star" ? 23 : (powerup.key === "cannabis" ? 21 : 15);
     const imageDrawn = drawImageSprite(powerup.key, 0, -4, spriteSize, powerup.color, 14);
     if (imageDrawn) {
       ctx.font = "bold 8px 'Press Start 2P', Courier New";
@@ -2318,8 +2386,39 @@ function renderFrame() {
   requestAnimationFrame(loop);
 }
 
+function normalizeSpriteTitle(value) {
+  return String(value || "").trim().replace(/\s+/g, " " ).toUpperCase();
+}
+
+function openSpriteInfo(card) {
+  const modal = document.getElementById("spriteInfoModal");
+  if (!modal) return;
+  const image = card.querySelector("img");
+  const strong = card.querySelector("strong");
+  const title = normalizeSpriteTitle(strong ? strong.textContent : card.textContent);
+  const titleEl = document.getElementById("spriteInfoTitle");
+  const textEl = document.getElementById("spriteInfoText");
+  const imgEl = document.getElementById("spriteInfoImage");
+  if (titleEl) titleEl.textContent = title;
+  if (textEl) textEl.textContent = SPRITE_DETAILS[title] || "Sprite special du systeme Inbox Invaders. Priorite: observer, comprendre, puis tirer.";
+  if (imgEl && image) {
+    imgEl.src = image.getAttribute("src");
+    imgEl.alt = title;
+  }
+  modal.classList.add("active");
+  modal.setAttribute("aria-hidden", "false");
+}
+
+function closeSpriteInfo() {
+  const modal = document.getElementById("spriteInfoModal");
+  if (!modal) return;
+  modal.classList.remove("active");
+  modal.setAttribute("aria-hidden", "true");
+}
+
 function bindInput() {
   window.addEventListener("keydown", event => {
+    if (event.code === "Escape") closeSpriteInfo();
     if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Space", "ShiftLeft", "ShiftRight", "KeyE"].includes(event.code)) event.preventDefault();
     initAudio();
     keys[event.code] = true;
@@ -2339,6 +2438,15 @@ function bindInput() {
   }
 
   document.addEventListener("click", event => {
+    const spriteCard = event.target.closest("#howScreen .bonus-item, #howScreen .enemy-legend span");
+    if (spriteCard) {
+      openSpriteInfo(spriteCard);
+      return;
+    }
+    if (event.target.closest("[data-action=\"closeSpriteInfo\"]") || event.target.id === "spriteInfoModal") {
+      closeSpriteInfo();
+      return;
+    }
     const avatarButton = event.target.closest("[data-avatar-key]");
     if (avatarButton) {
       selectAvatar(avatarButton.dataset.avatarKey);

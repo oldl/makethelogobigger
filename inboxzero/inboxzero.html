@@ -164,6 +164,7 @@
                 <div class="bonus-item qap"><img class="legend-sprite" src="assets/qap.png" alt=""><span><strong>QAP</strong><em>tir perforant x3</em></span></div>
                 <div class="bonus-item dolphin"><img class="legend-sprite" src="assets/bonus_dolphin.png" alt=""><span><strong>DOLPHIN</strong><em>dash esquive</em></span></div>
                 <div class="bonus-item vendredi"><img class="legend-sprite" src="assets/bonus_vendredi_15h.png" alt=""><span><strong>VENDREDI</strong><em>ralenti du temps</em></span></div>
+                <div class="bonus-item cannabis"><img class="legend-sprite" src="assets/cannabis.png" alt=""><span><strong>CANNABIS</strong><em>mode chill magique</em></span></div>
               </div>
             </section>
           </div>
@@ -180,6 +181,7 @@
               <span><img class="legend-sprite" src="assets/ticket jira.png" alt="">TICKET JIRA</span>
               <span><img class="legend-sprite" src="assets/12h!!!!.png" alt="">12H!!!!</span>
               <span><img class="legend-sprite" src="assets/error 404.png" alt="">ERROR 404</span>
+              <span><img class="legend-sprite" src="assets/rock.png" alt="">ROCK</span>
               <span><img class="legend-sprite" src="assets/windouf update.png" alt="">WINDOUF UPDATE</span>
               <span><img class="legend-sprite" src="assets/ref_is_down.png" alt="">REF IS DOWN!</span>
               <span><img class="legend-sprite" src="assets/dgc.png" alt="">DGC</span>
@@ -255,6 +257,16 @@
         <button id="touchBlast" aria-label="Focus blast">BLAST</button>
       </div>
     </section>
+
+    <div id="spriteInfoModal" class="sprite-info-modal" aria-hidden="true">
+      <div class="sprite-info-dialog" role="dialog" aria-modal="true" aria-labelledby="spriteInfoTitle">
+        <button class="sprite-info-close" type="button" data-action="closeSpriteInfo" aria-label="Fermer">×</button>
+        <img id="spriteInfoImage" class="sprite-info-image" src="" alt="">
+        <p id="spriteInfoKicker" class="sprite-info-kicker">SPRITE BRIEFING</p>
+        <h3 id="spriteInfoTitle"></h3>
+        <p id="spriteInfoText"></p>
+      </div>
+    </div>
 
     <script src="assets/invaders-sprites.js?v=20260609c"></script>
     <script src="game.js?v=20260612b"></script>
