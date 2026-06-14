@@ -212,9 +212,10 @@ const SPRITE_DETAILS = {
   "TICKET JIRA": "Petit mais procédurier. Il arrive avec un statut, une priorité et zéro contexte.",
   "12H!!!!": "Deadline midi. Fonce droit sur toi avec l'énergie du message envoyé trop tard.",
   "ERROR 404": "Pop-up absurde. Tire en éventail parce que l'information est introuvable.",
+  "ROCK": "Rollback du dimanche midi. Il était censé sauver la prod. Il a choisi le chaos. Ton rosbif est brûlé",
   "ROCK & ROLLBACK": "Rollback du dimanche midi. Il était censé sauver la prod. Il a choisi le chaos. Ton rosbif est brûlé",
   "WINDOUF UPDATE": "Mise à jour sauvage. Elle débarque quand tout allait presque bien.",
-  "REF IS DOWN!": "Miroir de la production. Refuse obstinément de refléter quoi que ce soit."
+  "REF IS DOWN!": "Miroir de la production. Refuse obstinément de refléter quoi que ce soit.",
   "DGC": "Fossile du département IT. Chaque ouverture est un pari contre le destin.",
   "AS400": "Ancien système, énorme inertie. Peu rapide, mais il encaisse comme un serveur oublié.",
   "PRAAT BARAK": "Parle beaucoup, bouge bizarrement, perturbe les trajectoires propres.Risque d'envoutement en phase de digestion.",
