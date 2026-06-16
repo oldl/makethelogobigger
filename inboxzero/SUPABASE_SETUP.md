@@ -33,20 +33,22 @@ with check (
 );
 ```
 
-## 2. Add keys in `game.js`
+## 2. Configure server-side keys in Netlify
 
-Find:
+Add these environment variables in Netlify:
 
-```js
-const SUPABASE_URL = "";
-const SUPABASE_ANON_KEY = "";
+```text
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
 
-Paste your Supabase project URL and anon public key.
+`SUPABASE_ANON_KEY` also works, but `SUPABASE_SERVICE_ROLE_KEY` is better for a server-side proxy.
 
 ## 3. Behavior
 
-- If Supabase keys are empty, scores are stored locally in the browser.
-- If Supabase keys are set, scores are submitted to `inbox_scores`.
+- When the game is served over `http` or `https`, it uses the same-origin route `/api/inbox-scores`.
+- This route runs on Netlify and talks to Supabase server-side, which avoids most browser, extension, firewall, or OS blocks.
+- If the proxy is unavailable, the game falls back to local browser scores automatically.
+- You can force local-only mode with `?scores=local`.
 - Players identify with a pseudo stored in `localStorage`.
 - This is friendly internal scoring, not anti-cheat secure.

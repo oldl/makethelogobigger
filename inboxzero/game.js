@@ -39,8 +39,8 @@ const screens = {
 let W = canvas.width;
 let H = canvas.height;
 const colors = ["#34d957", "#19e3e3", "#ff3d9a", "#ffd23d", "#ff3b3b"];
-const enemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "rock", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
-const fallbackEnemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "rock", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
+const enemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "rock", "pm", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
+const fallbackEnemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "rock", "pm", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lazy_loading", "infinite_versions"];
 const enemyLabels = {
   email: "EMAIL",
   meeting: "DOUBLE MEETING",
@@ -53,6 +53,7 @@ const enemyLabels = {
   urgent: "12H!!!!",
   popup: "ERROR 404",
   rock: "ROCK",
+  pm: "PM",
   windouf: "WINDOUF UPDATE",
   blue_screen: "REF IS DOWN!",
   dgc: "DGC",
@@ -83,6 +84,7 @@ const enemyLabelColors = {
   urgent: "#ff3b3b",
   popup: "#7cff4f",
   rock: "#9b92c8",
+  pm: "#ffd23d",
   windouf: "#36a3ff",
   blue_screen: "#2f7dff",
   dgc: "#ffd23d",
@@ -113,6 +115,7 @@ const imageSpriteSources = {
   urgent: "assets/12h!!!!.png",
   popup: "assets/error 404.png",
   rock: "assets/rock.png",
+  pm: "assets/pm.png",
   windouf: "assets/windouf update.png",
   blue_screen: "assets/ref_is_down.png",
   dgc: "assets/dgc.png",
@@ -191,9 +194,9 @@ const MAX_LEVEL = 16;
 const LAST_CHANCE_FOCUS_COST = 60;
 const REPLY_ALL_COOLDOWN = 6.5;
 const MAX_HEAT = 100;
-const SUPABASE_URL = "https://ebhpkgjlzvbfwpucofho.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_LGHW2HETXjgHS1slv1DQGQ_ty2n4LzU";
-const SCORE_TABLE = "inbox_scores";
+const SCORE_API_PATH = "/api/inbox-scores";
+const REMOTE_SCORE_PREF_KEY = "inboxInvadersRemoteScores";
+const REMOTE_SCORE_DISABLED_REASON_KEY = "inboxInvadersRemoteScoresDisabledReason";
 const SPRITE_DETAILS = {
   "COFFEE": "Accélère ta cadence de tir et rend le bureau franchement plus productif pendant quelques secondes.",
   "HONEY": "Pose un champ collant: les distractions ralentissent et les projectiles se calment.",
@@ -214,6 +217,7 @@ const SPRITE_DETAILS = {
   "ERROR 404": "Pop-up absurde. Tire en éventail parce que l'information est introuvable.",
   "ROCK": "Rollback du dimanche midi. Il était censé sauver la prod. Il a choisi le chaos. Ton rosbif est brûlé",
   "ROCK & ROLLBACK": "Rollback du dimanche midi. Il était censé sauver la prod. Il a choisi le chaos. Ton rosbif est brûlé",
+  "PM": "Change la priorité en plein combat. Peut transformer une petite tâche en mini-crise de planning.",
   "WINDOUF UPDATE": "Mise à jour sauvage. Elle débarque quand tout allait presque bien.",
   "REF IS DOWN!": "Miroir de la production. Refuse obstinément de refléter quoi que ce soit.",
   "DGC": "Fossile du département IT. Chaque ouverture est un pari contre le destin.",
@@ -297,6 +301,8 @@ let playerId = localStorage.getItem("inboxInvadersPlayerId") || "";
 let playerName = localStorage.getItem("inboxInvadersPlayerName") || "";
 let playerAvatarKey = localStorage.getItem("inboxInvadersPlayerAvatar") || AVATAR_OPTIONS[0].key;
 let runScoreSubmitted = false;
+let remoteScoresEnabled = readRemoteScorePreference();
+let remoteScoresDisabledReason = localStorage.getItem(REMOTE_SCORE_DISABLED_REASON_KEY) || "";
 let renderedLives = -1;
 const imageSprites = {};
 let imageSpritesLoaded = 0;
@@ -623,8 +629,48 @@ function renderAvatarOptions() {
   });
 }
 
+function readRemoteScorePreference() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const forcedMode = String(params.get("scores") || params.get("leaderboard") || "").toLowerCase();
+    if (["remote", "online", "1", "true", "on"].includes(forcedMode)) {
+      localStorage.setItem(REMOTE_SCORE_PREF_KEY, "1");
+      localStorage.removeItem(REMOTE_SCORE_DISABLED_REASON_KEY);
+      return true;
+    }
+    if (["local", "offline", "0", "false", "off"].includes(forcedMode)) {
+      localStorage.setItem(REMOTE_SCORE_PREF_KEY, "0");
+      return false;
+    }
+    if (window.INBOX_INVADERS_REMOTE_SCORES === true) return true;
+    const savedPreference = localStorage.getItem(REMOTE_SCORE_PREF_KEY);
+    if (savedPreference === "1") return true;
+    if (savedPreference === "0") return false;
+    return window.location.protocol === "http:" || window.location.protocol === "https:";
+  } catch (error) {
+    console.warn("Remote score preference read failed", error);
+    return false;
+  }
+}
+
+function disableRemoteScores(reason) {
+  remoteScoresEnabled = false;
+  remoteScoresDisabledReason = reason || "blocked";
+  localStorage.setItem(REMOTE_SCORE_PREF_KEY, "0");
+  localStorage.setItem(REMOTE_SCORE_DISABLED_REASON_KEY, remoteScoresDisabledReason);
+}
+
+function shouldDisableRemoteScores(error) {
+  return error instanceof TypeError || /failed to fetch|load failed|networkerror/i.test(String(error));
+}
+
+function getScoreApiUrl() {
+  if (!(window.location.protocol === "http:" || window.location.protocol === "https:")) return "";
+  return SCORE_API_PATH;
+}
+
 function hasRemoteScores() {
-  return SUPABASE_URL.indexOf("http") === 0 && SUPABASE_ANON_KEY.length > 20;
+  return remoteScoresEnabled && !!getScoreApiUrl();
 }
 
 function submitRunScore() {
@@ -649,36 +695,30 @@ function saveLocalScore(entry) {
 
 async function postRemoteScore(entry) {
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/${SCORE_TABLE}`, {
+    const response = await fetch(getScoreApiUrl(), {
       method: "POST",
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        "Content-Type": "application/json",
-        Prefer: "return=minimal"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(entry)
     });
+    if (!response.ok) throw new Error(`Score upload ${response.status}`);
   } catch (error) {
     console.warn("Score upload failed", error);
+    if (shouldDisableRemoteScores(error)) disableRemoteScores("upload-blocked");
   }
 }
 
 async function loadLeaderboard() {
-  renderLeaderboard(getLocalScores(), hasRemoteScores() ? "REMOTE SYNC..." : "LOCAL SCORES");
+  const initialMode = hasRemoteScores() ? "REMOTE SYNC..." : "LOCAL SCORES";
+  renderLeaderboard(getLocalScores(), initialMode);
   if (!hasRemoteScores()) return;
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/${SCORE_TABLE}?select=player_name,score,level,created_at&order=score.desc&limit=10`, {
-      headers: {
-        apikey: SUPABASE_ANON_KEY,
-        Authorization: `Bearer ${SUPABASE_ANON_KEY}`
-      }
-    });
+    const response = await fetch(getScoreApiUrl());
     if (!response.ok) throw new Error(`Leaderboard ${response.status}`);
     const scores = await response.json();
     renderLeaderboard(scores, "GLOBAL SCORES");
   } catch (error) {
     console.warn("Leaderboard fetch failed", error);
+    if (shouldDisableRemoteScores(error)) disableRemoteScores("fetch-blocked");
     renderLeaderboard(getLocalScores(), "LOCAL FALLBACK");
   }
 }
@@ -1067,9 +1107,9 @@ function spawnEnemy() {
 }
 
 function createEnemy(type, fast, difficulty) {
-  const size = type === "rock" ? (fast ? 98 : 92) : (type === "as400" ? (fast ? 96 : 92) : (["last_update", "mfa_loop", "vpn_down", "security_patch", "po_japon", "ezf", "magnolia", "consultant", "handover"].includes(type) ? (fast ? 88 : 80) : (fast ? 90 : 82)));
-  const hp = type === "rock" ? (fast ? 4 : 3) : (type === "as400" ? (fast ? 4 : 3) : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" || type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" ? 2 : 1));
-  const speedMods = { rock: 0.7, as400: 0.66, praat_barak: 1.18, po_japon: 1.08, ezf: 0.94, magnolia: 0.9, last_update: 1.28, vpn_down: 1.15, security_patch: 0.82, consultant: 0.96, handover: 0.92 };
+  const size = type === "rock" ? (fast ? 98 : 92) : (type === "as400" ? (fast ? 96 : 92) : (["last_update", "mfa_loop", "vpn_down", "security_patch", "po_japon", "ezf", "magnolia", "consultant", "handover", "pm"].includes(type) ? (fast ? 88 : 80) : (fast ? 90 : 82)));
+  const hp = type === "rock" ? (fast ? 4 : 3) : (type === "as400" ? (fast ? 4 : 3) : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" || type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" || type === "pm" ? 2 : 1));
+  const speedMods = { rock: 0.7, as400: 0.66, praat_barak: 1.18, po_japon: 1.08, ezf: 0.94, magnolia: 0.9, last_update: 1.28, vpn_down: 1.15, security_patch: 0.82, consultant: 0.96, handover: 0.92, pm: 1.06 };
   const speedMod = speedMods[type] || 1;
   return {
     type,
@@ -1080,7 +1120,7 @@ function createEnemy(type, fast, difficulty) {
     h: size,
     hp,
     maxHp: hp,
-    scoreValue: type === "as400" ? 28 : (type === "rock" ? 26 : (type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" ? 24 : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" ? 18 : null))),
+    scoreValue: type === "as400" ? 28 : (type === "rock" ? 26 : (type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" || type === "pm" ? 24 : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" ? 18 : null))),
     vx: (Math.random() - 0.5) * (46 + difficulty * 10.8) * speedMod,
     vy: ((fast ? 112 : 68) + difficulty * 14.5) * speedMod,
     color: fast ? "#ff3b3b" : (enemyLabelColors[type] || colors[Math.floor(Math.random() * colors.length)]),
@@ -1105,7 +1145,7 @@ function shootEnemy(enemy) {
     [-70, 0, 70].forEach(vx => pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, vx, speed, 8, 18));
   } else if (enemy.type === "blue_screen") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.18, speed * 0.58, 24, 30);
-  } else if (enemy.type === "ppt" || enemy.type === "word" || enemy.type === "rock" || enemy.type === "lazy_loading" || enemy.type === "infinite_versions" || enemy.type === "as400" || enemy.type === "mfa_loop" || enemy.type === "security_patch" || enemy.type === "ezf" || enemy.type === "magnolia" || enemy.type === "consultant" || enemy.type === "handover") {
+  } else if (enemy.type === "ppt" || enemy.type === "word" || enemy.type === "rock" || enemy.type === "pm" || enemy.type === "lazy_loading" || enemy.type === "infinite_versions" || enemy.type === "as400" || enemy.type === "mfa_loop" || enemy.type === "security_patch" || enemy.type === "ezf" || enemy.type === "magnolia" || enemy.type === "consultant" || enemy.type === "handover") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.35, speed * 0.78, 14, 24);
   } else if (enemy.type === "jira" || enemy.type === "chat" || enemy.type === "windouf" || enemy.type === "praat_barak" || enemy.type === "vpn_down" || enemy.type === "po_japon") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, (Math.random() > 0.5 ? 1 : -1) * 95, speed * 0.95, 8, 18, 56);
