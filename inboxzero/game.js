@@ -22,6 +22,7 @@ const setupPilotClass = document.getElementById("setupPilotClass");
 const avatarGrid = document.getElementById("avatarGrid");
 const leaderboardList = document.getElementById("leaderboardList");
 const leaderboardMode = document.getElementById("leaderboardMode");
+const leaderboardStatus = document.getElementById("leaderboardStatus");
 const commandDock = document.getElementById("commandDock");
 const commandDockPrimary = document.getElementById("commandDockPrimary");
 const commandDockTabs = Array.from(document.querySelectorAll("[data-screen-tab]"));
@@ -195,6 +196,8 @@ const LAST_CHANCE_FOCUS_COST = 60;
 const REPLY_ALL_COOLDOWN = 6.5;
 const MAX_HEAT = 100;
 const SCORE_API_PATH = "/api/inbox-scores";
+const LEADERBOARD_PAGE_SIZE = 25;
+const LEADERBOARD_SCROLL_THRESHOLD = 120;
 const REMOTE_SCORE_PREF_KEY = "inboxInvadersRemoteScores";
 const REMOTE_SCORE_DISABLED_REASON_KEY = "inboxInvadersRemoteScoresDisabledReason";
 const SPRITE_DETAILS = {
@@ -303,6 +306,13 @@ let playerAvatarKey = localStorage.getItem("inboxInvadersPlayerAvatar") || AVATA
 let runScoreSubmitted = false;
 let remoteScoresEnabled = readRemoteScorePreference();
 let remoteScoresDisabledReason = localStorage.getItem(REMOTE_SCORE_DISABLED_REASON_KEY) || "";
+let leaderboardEntries = [];
+let leaderboardCursor = 0;
+let leaderboardHasMore = false;
+let leaderboardLoading = false;
+let leaderboardSource = "local";
+let leaderboardRequestToken = 0;
+let leaderboardRemoteOffset = 0;
 let renderedLives = -1;
 const imageSprites = {};
 let imageSpritesLoaded = 0;
@@ -708,42 +718,62 @@ async function postRemoteScore(entry) {
 }
 
 async function loadLeaderboard() {
-  const initialMode = hasRemoteScores() ? "REMOTE SYNC..." : "LOCAL SCORES";
-  renderLeaderboard(getLocalScores(), initialMode);
-  if (!hasRemoteScores()) return;
+  const requestToken = ++leaderboardRequestToken;
+  if (!hasRemoteScores()) {
+    startLocalLeaderboard("LOCAL SCORES");
+    return;
+  }
+  resetLeaderboard("GLOBAL SCORES");
+  leaderboardSource = "remote";
+  leaderboardRemoteOffset = 0;
+  leaderboardHasMore = true;
+  setLeaderboardStatus("SYNCING...");
   try {
-    const response = await fetch(getScoreApiUrl());
-    if (!response.ok) throw new Error(`Leaderboard ${response.status}`);
-    const scores = await response.json();
-    renderLeaderboard(scores, "GLOBAL SCORES");
+    await loadNextRemoteLeaderboardPage(requestToken);
   } catch (error) {
     console.warn("Leaderboard fetch failed", error);
     if (shouldDisableRemoteScores(error)) disableRemoteScores("fetch-blocked");
-    renderLeaderboard(getLocalScores(), "LOCAL FALLBACK");
+    if (requestToken !== leaderboardRequestToken) return;
+    startLocalLeaderboard("LOCAL FALLBACK");
   }
 }
 
 function getLocalScores() {
-  return JSON.parse(localStorage.getItem("inboxInvadersScores") || "[]").slice(0, 10);
+  return JSON.parse(localStorage.getItem("inboxInvadersScores") || "[]");
 }
 
-function renderLeaderboard(scores, mode) {
+function setLeaderboardStatus(text) {
+  if (leaderboardStatus) leaderboardStatus.textContent = text;
+}
+
+function resetLeaderboard(mode) {
   if (leaderboardMode) leaderboardMode.textContent = mode;
   if (!leaderboardList) return;
   leaderboardList.innerHTML = "";
+  leaderboardList.scrollTop = 0;
+  leaderboardEntries = [];
+  leaderboardCursor = 0;
+  leaderboardHasMore = false;
+  leaderboardLoading = false;
+  setLeaderboardStatus("READY");
+}
+
+function appendLeaderboardRows(scores) {
+  if (!leaderboardList) return;
   const rows = scores.length ? scores : [{ player_name: "AUCUN SCORE", score: 0, level: 0 }];
   rows.forEach((entry, index) => {
+    const absoluteIndex = leaderboardCursor + index;
     const avatar = entry.player_id === playerId
       ? (AVATAR_OPTIONS.find(option => option.key === playerAvatarKey) || AVATAR_OPTIONS[0])
-      : AVATAR_OPTIONS[index % AVATAR_OPTIONS.length];
+      : AVATAR_OPTIONS[absoluteIndex % AVATAR_OPTIONS.length];
     const item = document.createElement("li");
     const avatarImage = document.createElement("img");
     const rank = document.createElement("span");
     const name = document.createElement("strong");
     const scoreValue = document.createElement("em");
     const levelValue = document.createElement("small");
-    item.className = `${index < 3 ? `rank-${index + 1}` : ""}${entry.player_id === playerId ? " is-me" : ""}`.trim();
-    rank.textContent = String(index + 1);
+    item.className = `${absoluteIndex < 3 ? `rank-${absoluteIndex + 1}` : ""}${entry.player_id === playerId ? " is-me" : ""}`.trim();
+    rank.textContent = String(absoluteIndex + 1);
     avatarImage.src = imageSpriteSources[avatar.key];
     avatarImage.alt = "";
     name.textContent = entry.player_name || "INVITE";
@@ -752,6 +782,71 @@ function renderLeaderboard(scores, mode) {
     item.append(rank, avatarImage, name, scoreValue, levelValue);
     leaderboardList.appendChild(item);
   });
+  leaderboardCursor += scores.length ? scores.length : 1;
+}
+
+function startLocalLeaderboard(mode) {
+  leaderboardSource = "local";
+  resetLeaderboard(mode);
+  leaderboardEntries = getLocalScores();
+  leaderboardHasMore = leaderboardEntries.length > 0;
+  appendNextLocalLeaderboardChunk();
+}
+
+function appendNextLocalLeaderboardChunk() {
+  if (leaderboardSource !== "local") return;
+  if (!leaderboardEntries.length) {
+    appendLeaderboardRows([]);
+    leaderboardHasMore = false;
+    setLeaderboardStatus("NO SCORES YET");
+    return;
+  }
+  const nextRows = leaderboardEntries.slice(leaderboardCursor, leaderboardCursor + LEADERBOARD_PAGE_SIZE);
+  if (!nextRows.length) {
+    leaderboardHasMore = false;
+    setLeaderboardStatus("END OF LOCAL SCORES");
+    return;
+  }
+  appendLeaderboardRows(nextRows);
+  leaderboardHasMore = leaderboardCursor < leaderboardEntries.length;
+  setLeaderboardStatus(leaderboardHasMore ? "SCROLL FOR MORE" : "END OF LOCAL SCORES");
+}
+
+async function loadNextRemoteLeaderboardPage(requestToken = leaderboardRequestToken) {
+  if (!hasRemoteScores() || leaderboardLoading || !leaderboardHasMore) return;
+  leaderboardLoading = true;
+  setLeaderboardStatus("LOADING MORE...");
+  try {
+    const response = await fetch(`${getScoreApiUrl()}?limit=${LEADERBOARD_PAGE_SIZE}&offset=${leaderboardRemoteOffset}`);
+    if (!response.ok) throw new Error(`Leaderboard ${response.status}`);
+    const payload = await response.json();
+    if (requestToken !== leaderboardRequestToken) return;
+    const rows = Array.isArray(payload) ? payload : (Array.isArray(payload.items) ? payload.items : []);
+    if (!rows.length && leaderboardRemoteOffset === 0) {
+      appendLeaderboardRows([]);
+      leaderboardHasMore = false;
+      setLeaderboardStatus("NO GLOBAL SCORES YET");
+      return;
+    }
+    appendLeaderboardRows(rows);
+    leaderboardRemoteOffset += rows.length;
+    leaderboardHasMore = Array.isArray(payload.items) ? !!payload.hasMore : rows.length === LEADERBOARD_PAGE_SIZE;
+    setLeaderboardStatus(leaderboardHasMore ? "SCROLL FOR MORE" : "END OF GLOBAL SCORES");
+  } finally {
+    leaderboardLoading = false;
+    maybeLoadMoreLeaderboard();
+  }
+}
+
+function maybeLoadMoreLeaderboard() {
+  if (state !== "leaderboard" || !leaderboardList || leaderboardLoading) return;
+  const remaining = leaderboardList.scrollHeight - leaderboardList.scrollTop - leaderboardList.clientHeight;
+  if (remaining > LEADERBOARD_SCROLL_THRESHOLD) return;
+  if (leaderboardSource === "remote") {
+    if (leaderboardHasMore) loadNextRemoteLeaderboardPage();
+    return;
+  }
+  if (leaderboardHasMore) appendNextLocalLeaderboardChunk();
 }
 
 // Boss levels still spawn a smaller escort wave so the screen stays lively.
@@ -2522,6 +2617,8 @@ function bindInput() {
     if (action === "resume") setState("game");
     if (action === "pause" && state === "game") setState("pause");
   });
+
+  if (leaderboardList) leaderboardList.addEventListener("scroll", maybeLoadMoreLeaderboard);
 
   const bindTouch = (id, prop) => {
     const button = document.getElementById(id);

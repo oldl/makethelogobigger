@@ -1,4 +1,6 @@
 const SCORE_TABLE = "inbox_scores";
+const DEFAULT_LIMIT = 25;
+const MAX_LIMIT = 100;
 
 function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL || "";
@@ -53,6 +55,14 @@ async function fetchSupabase(path, options = {}) {
   });
 }
 
+function readPagingParams(queryStringParameters = {}) {
+  const rawLimit = Number(queryStringParameters.limit);
+  const rawOffset = Number(queryStringParameters.offset);
+  const limit = Number.isFinite(rawLimit) ? Math.min(MAX_LIMIT, Math.max(1, Math.round(rawLimit))) : DEFAULT_LIMIT;
+  const offset = Number.isFinite(rawOffset) ? Math.max(0, Math.round(rawOffset)) : 0;
+  return { limit, offset };
+}
+
 exports.handler = async event => {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 204, headers: corsHeaders(), body: "" };
@@ -60,18 +70,16 @@ exports.handler = async event => {
 
   try {
     if (event.httpMethod === "GET") {
+      const { limit, offset } = readPagingParams(event.queryStringParameters);
       const response = await fetchSupabase(
-        `${SCORE_TABLE}?select=player_id,player_name,score,level,created_at&order=score.desc&limit=10`
+        `${SCORE_TABLE}?select=player_id,player_name,score,level,created_at&order=score.desc&limit=${limit}&offset=${offset}`
       );
-      const body = await response.text();
-      return {
-        statusCode: response.status,
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-          ...corsHeaders()
-        },
-        body
-      };
+      const body = await response.json();
+      return json(response.status, {
+        items: Array.isArray(body) ? body : [],
+        hasMore: Array.isArray(body) ? body.length === limit : false,
+        nextOffset: offset + (Array.isArray(body) ? body.length : 0)
+      });
     }
 
     if (event.httpMethod === "POST") {

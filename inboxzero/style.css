@@ -738,6 +738,16 @@ body:has(.redesign-screen.active) .game-stage {
   margin: 0;
   padding: 0;
   list-style: none;
+  max-height: min(58vh, 680px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
+}
+
+.leaderboard-status {
+  color: var(--cyan);
+  text-align: center;
+  min-height: 1.4em;
 }
 
 .leaderboard-list li {
