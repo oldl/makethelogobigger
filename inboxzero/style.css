@@ -1731,7 +1731,6 @@ body:has(.redesign-screen.active) .game-stage {
 .bonus-item.qap { color: var(--magenta); }
 .bonus-item.dolphin { color: var(--cyan); }
 .bonus-item.vendredi { color: #b56cff; }
-.bonus-item.cannabis { color: #b6ff2e; }
 
 .redesign-enemies.enemy-legend {
   display: grid;
@@ -2344,6 +2343,10 @@ body.loading-assets .mobile-controls {
   object-fit: contain;
   image-rendering: pixelated;
   filter: drop-shadow(0 0 18px rgba(25,227,227,0.45));
+}
+
+.sprite-info-image.sprite-info-image-wide {
+  width: min(375px, 78vw);
 }
 
 .sprite-info-kicker {
