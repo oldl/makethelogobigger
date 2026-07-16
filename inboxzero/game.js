@@ -40,8 +40,8 @@ const screens = {
 let W = canvas.width;
 let H = canvas.height;
 const colors = ["#34d957", "#19e3e3", "#ff3d9a", "#ffd23d", "#ff3b3b"];
-const enemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "rock", "pm", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lexicoplane", "lazy_loading", "infinite_versions"];
-const fallbackEnemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "rock", "pm", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "security_patch", "lexicoplane", "lazy_loading", "infinite_versions"];
+const enemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "rock", "pm", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "lexicoplane", "lazy_loading", "infinite_versions"];
+const fallbackEnemyTypes = ["email", "meeting", "call", "ppt", "word", "excel", "chat", "jira", "urgent", "popup", "rock", "pm", "windouf", "blue_screen", "blue_screen", "blue_screen", "dgc", "dgc", "dgc", "as400", "praat_barak", "po_japon", "ezf", "magnolia", "consultant", "handover", "last_update", "mfa_loop", "vpn_down", "lexicoplane", "lazy_loading", "infinite_versions"];
 const enemyLabels = {
   email: "EMAIL",
   meeting: "DOUBLE MEETING",
@@ -68,7 +68,6 @@ const enemyLabels = {
   last_update: "PASSKEY",
   mfa_loop: "EASY FORM",
   vpn_down: "SUNDAY RELEASE",
-  security_patch: "SECURITY PATCH",
   lexicoplane: "LEXICOPLANE",
   lazy_loading: "LAZY LOADING",
   infinite_versions: "INFINITE VERSIONS",
@@ -100,7 +99,6 @@ const enemyLabelColors = {
   last_update: "#ff8a1a",
   mfa_loop: "#b56cff",
   vpn_down: "#19e3e3",
-  security_patch: "#ffd23d",
   lexicoplane: "#ffe27a",
   lazy_loading: "#9bffff",
   infinite_versions: "#b56cff",
@@ -133,7 +131,6 @@ const imageSpriteSources = {
   mfa_loop: "assets/ca6b6877-e752-4e89-9191-3670797ed381_removalai_preview.png",
   vpn_down: "assets/12599df6-1e90-4584-9417-eee2061a4efa_removalai_preview.png",
   boss_special_shot: "assets/e4a37a65-ab33-4795-914c-9910bc2f18b8_removalai_preview.png",
-  security_patch: "assets/992d3e03-5cb6-4455-8b45-6aff71827215_removalai_preview.png",
   lexicoplane: "assets/lexicoplane.png",
   lazy_loading: "assets/lazy loading.png",
   infinite_versions: "assets/infinite versions.png",
@@ -232,7 +229,6 @@ const SPRITE_DETAILS = {
   "MAGNOLIA": "Update CMS fleuri. Joli à regarder, moins joli quand ça casse la prod.",
   "CONSULTANT": "Arrive avec des slides, des graphes et une question simple qui va prendre 3 QAP .",
   "HANDOVER": "Transfert de dossier. Si tu rates le relais, tout revient dans ton inbox.",
-  "SECURITY PATCH": "Correctif de sécurité pressé. Solide, lent, et toujours plus urgent que prévu.",
   "PASSKEY": "Clé magique d'authentification. Utile, mais elle adore expirer au pire moment.",
   "EASY FORM": "Formulaire prétendument simple. Il cache toujours un champ obligatoire invisible.",
   "SUNDAY RELEASE": "Release du dimanche. Personne ne sait pourquoi elle existe, tout le monde la subit.",
@@ -1201,9 +1197,9 @@ function spawnEnemy() {
 }
 
 function createEnemy(type, fast, difficulty) {
-  const size = type === "rock" ? (fast ? 98 : 92) : (type === "as400" ? (fast ? 96 : 92) : (["last_update", "mfa_loop", "vpn_down", "security_patch", "po_japon", "ezf", "magnolia", "consultant", "handover", "pm", "lexicoplane"].includes(type) ? (fast ? 88 : 80) : (fast ? 90 : 82)));
-  const hp = type === "rock" ? (fast ? 4 : 3) : (type === "as400" ? (fast ? 4 : 3) : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" || type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" || type === "pm" ? 2 : (type === "lexicoplane" ? (fast ? 6 : 5) : 1)));
-  const speedMods = { rock: 0.7, as400: 0.66, praat_barak: 1.18, po_japon: 1.08, ezf: 0.94, magnolia: 0.9, last_update: 1.28, vpn_down: 1.15, security_patch: 0.82, consultant: 0.96, handover: 0.92, pm: 1.06, lexicoplane: 1.02 };
+  const size = type === "rock" ? (fast ? 98 : 92) : (type === "as400" ? (fast ? 96 : 92) : (["last_update", "mfa_loop", "vpn_down", "po_japon", "ezf", "magnolia", "consultant", "handover", "pm", "lexicoplane"].includes(type) ? (fast ? 88 : 80) : (fast ? 90 : 82)));
+  const hp = type === "rock" ? (fast ? 4 : 3) : (type === "as400" ? (fast ? 4 : 3) : (type === "blue_screen" || type === "mfa_loop" || type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" || type === "pm" ? 2 : (type === "lexicoplane" ? (fast ? 6 : 5) : 1)));
+  const speedMods = { rock: 0.7, as400: 0.66, praat_barak: 1.18, po_japon: 1.08, ezf: 0.94, magnolia: 0.9, last_update: 1.28, vpn_down: 1.15, consultant: 0.96, handover: 0.92, pm: 1.06, lexicoplane: 1.02 };
   const speedMod = speedMods[type] || 1;
   return {
     type,
@@ -1214,7 +1210,7 @@ function createEnemy(type, fast, difficulty) {
     h: size,
     hp,
     maxHp: hp,
-    scoreValue: type === "as400" ? 28 : (type === "rock" ? 26 : (type === "lexicoplane" ? 34 : (type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" || type === "pm" ? 24 : (type === "blue_screen" || type === "mfa_loop" || type === "security_patch" ? 18 : null)))),
+    scoreValue: type === "as400" ? 28 : (type === "rock" ? 26 : (type === "lexicoplane" ? 34 : (type === "ezf" || type === "magnolia" || type === "consultant" || type === "handover" || type === "pm" ? 24 : (type === "blue_screen" || type === "mfa_loop" ? 18 : null)))),
     vx: (Math.random() - 0.5) * (46 + difficulty * 10.8) * speedMod,
     vy: ((fast ? 112 : 68) + difficulty * 14.5) * speedMod,
     color: fast ? "#ff3b3b" : (enemyLabelColors[type] || colors[Math.floor(Math.random() * colors.length)]),
@@ -1242,7 +1238,7 @@ function shootEnemy(enemy) {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.18, speed * 0.58, 24, 30);
   } else if (enemy.type === "lexicoplane") {
     [-72, -24, 24, 72].forEach(offset => pushEnemyBullet(enemy.x + offset * 0.12, enemy.y + enemy.h / 2, offset * 0.55, speed * 0.92, 8, 18));
-  } else if (enemy.type === "ppt" || enemy.type === "word" || enemy.type === "rock" || enemy.type === "pm" || enemy.type === "lazy_loading" || enemy.type === "infinite_versions" || enemy.type === "as400" || enemy.type === "mfa_loop" || enemy.type === "security_patch" || enemy.type === "ezf" || enemy.type === "magnolia" || enemy.type === "consultant" || enemy.type === "handover") {
+  } else if (enemy.type === "ppt" || enemy.type === "word" || enemy.type === "rock" || enemy.type === "pm" || enemy.type === "lazy_loading" || enemy.type === "infinite_versions" || enemy.type === "as400" || enemy.type === "mfa_loop" || enemy.type === "ezf" || enemy.type === "magnolia" || enemy.type === "consultant" || enemy.type === "handover") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, aimed.vx * 0.35, speed * 0.78, 14, 24);
   } else if (enemy.type === "jira" || enemy.type === "chat" || enemy.type === "windouf" || enemy.type === "praat_barak" || enemy.type === "vpn_down" || enemy.type === "po_japon") {
     pushEnemyBullet(enemy.x, enemy.y + enemy.h / 2, (Math.random() > 0.5 ? 1 : -1) * 95, speed * 0.95, 8, 18, 56);
